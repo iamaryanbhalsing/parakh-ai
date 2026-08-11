@@ -4,5 +4,5 @@
 # window.PARAKH_API_BASE in frontend/js before the app scripts load.
 
 [build]
-  command = "mkdir -p frontend && cp -r backend/app/static/. frontend/"
+  command = "node scripts/build-frontend.mjs"
   publish = "frontend"

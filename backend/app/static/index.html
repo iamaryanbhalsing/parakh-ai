@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parakh AI &middot; Payment Simulator</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">&#128737;</div>
+    <div>
+      <div class="name">Parakh <span class="brand-hi">परख</span> AI</div>
+      <div class="tag">UPI Fraud-Intervention Engine &middot; Live Prototype</div>
+    </div>
+  </div>
+  <nav class="topnav">
+    <a href="index.html" class="active">Payment Simulator</a>
+    <a href="dashboard.html">Ops Dashboard</a>
+    <a href="#" class="docs-link">API Docs</a>
+  </nav>
+  <span class="badge-live"><span class="dot"></span>Engine Live</span>
+</header>
+
+<script>
+  window.PARAKH_API_BASE = window.PARAKH_API_BASE ||
+    new URLSearchParams(location.search).get("api") || "";
+  document.addEventListener("DOMContentLoaded", function () {
+    var a = document.querySelector(".docs-link");
+    if (a) a.href = (window.PARAKH_API_BASE || "") + "/docs";
+  });
+</script>
+
+<main>
+  <div class="grid grid-main">
+
+    <!-- ================= LEFT : scenario + phone + call ================= -->
+    <section>
+      <div class="card">
+        <h2>&#128279; Attack Scenarios <span class="sub">pick a story, the phone plays it out</span></h2>
+        <div class="scenario-list" id="scenarioList"></div>
+      </div>
+
+      <div class="card mt-16">
+        <h2>&#128241; Payment Flow <span class="sub">simulated UPI app on a device</span></h2>
+        <div class="phone-stage">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="statusbar">
+              <span id="phoneTime">09:41</span>
+              <span>&#128241; &#128268; &#9878; 92%</span>
+            </div>
+            <div class="screen">
+              <div class="app-header">
+                <div class="avatar" id="appAvatar">R</div>
+                <div class="who"><b id="appPayee">Ramesh Kumar</b><span id="appPayeeSub">UPI ID &middot; ramesh@okhdfc</span></div>
+                <div>&#8942;</div>
+              </div>
+              <div class="amount-box">
+                <div class="lbl">Amount</div>
+                <div class="amount" id="appAmount">&#8377;98,000</div>
+                <div class="approx" id="appApprox">~ 65x your usual payment</div>
+              </div>
+              <div class="balance-chip">
+                <span>&#128176; Balance</span>
+                <b id="appBalance">&#8377;1,00,000</b>
+              </div>
+              <button class="pay-btn" id="payBtn">&#128176; Pay &#8377;98,000</button>
+              <div class="pay-hint" id="payHint">Press pay to trigger real-time risk scoring</div>
+
+              <div id="phoneStatus" class="phone-status hidden">
+                <span class="spinner"></span><span>Analyzing transaction...</span>
+              </div>
+              <div id="phoneResult"></div>
+
+              <!-- call overlay -->
+              <div id="callOverlay" class="call-overlay hidden">
+                <div class="call-avatar" id="callAvatar">&#128100;</div>
+                <div class="call-who">
+                  <b id="callName">Unknown Caller</b>
+                  <span id="callNumber">+91 &middot;&middot;&middot; &middot;&middot; 5 &middot; 2 &middot;&middot;</span>
+                </div>
+                <div>
+                  <div class="call-timer" id="callTimer">00:00</div>
+                  <div class="call-tags">
+                    <span class="call-tag danger" id="tagShare">&#128105;&#8205;&#128187; Screen share</span>
+                    <span class="call-tag warn" id="tagUnknown">&#10067; Not in contacts</span>
+                    <span class="call-tag warn" id="tagVideo">&#128249; Video</span>
+                  </div>
+                </div>
+                <div class="call-actions">
+                  <button class="btn sm ghost" id="callVerify">&#129302; "Verify your identity" &rarr;</button>
+                  <div class="call-controls">
+                    <button class="call-btn dim" id="callMic" title="mute">&#127908;</button>
+                    <button class="call-btn red" id="callEnd">&#128222;</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="note mt-16">&#128161; Phone state is simulated from the selected scenario: incoming call, screen-share flag, and caller identity feed the engine's call-context signals.</div>
+      </div>
+
+      <div class="card mt-16">
+        <h2>&#128172; Live Conversation <span class="sub">urgency is analyzed from the transcript</span></h2>
+        <div class="chat" id="chatBox"></div>
+        <div class="urgency-meter">
+          <div class="head"><span>Conversational pressure</span><b id="urgencyPct">0%</b></div>
+          <div class="urgency-bar"><div class="urgency-fill" id="urgencyFill"></div></div>
+          <div class="urgency-terms" id="urgencyTerms"></div>
+        </div>
+        <div class="voice-box hidden" id="voiceBox">
+          <div class="head">
+            <b>&#127911; Voice-clone indicator <span class="muted">(simulated acoustic model)</span></b>
+            <span class="band-pill" id="voiceBand">--</span>
+          </div>
+          <div class="waveform" id="waveform"></div>
+          <div class="voice-detail" id="voiceDetail"></div>
+        </div>
+      </div>
+
+      <div class="card mt-16">
+        <h2>&#129504; AI Call Intelligence <span class="sub">NLP/LLM analysis of the voice conversation &rarr; final opinion</span></h2>
+        <div class="ai-engine-row">
+          <div class="flex-center">
+            <span class="muted">Engine</span>
+            <select class="ai-select sm" id="aiEngine">
+              <option value="auto">Auto (LLM when available)</option>
+              <option value="nlp">NLP rules (offline)</option>
+              <option value="llm">AI agent (LLM)</option>
+            </select>
+          </div>
+          <span class="ai-engine-status" id="aiEngineStatus">checking LLM status&hellip;</span>
+        </div>
+
+        <div class="ai-tabs">
+          <button class="ai-tab active" data-tab="live">&#127908; Live Listen</button>
+          <button class="ai-tab" data-tab="upload">&#128228; Upload Recording</button>
+          <button class="ai-tab" data-tab="paste">&#128221; Transcript</button>
+        </div>
+
+        <div class="ai-panel" id="tab-live">
+          <div class="ai-live-row">
+            <button class="btn sm" id="aiMicBtn">&#127908; Start Live Listen</button>
+            <span class="muted">Microphone &rarr; Web Speech API &rarr; live NLP opinion. The simulated call is analyzed automatically.</span>
+          </div>
+          <div class="ai-live-box" id="aiLiveBox">
+            <div class="empty">Speak (or let the simulated call play) &mdash; the transcript is analyzed turn by turn.</div>
+          </div>
+          <div class="ai-live-verdict" id="aiLiveVerdict">
+            <span class="muted">Waiting for conversation&hellip;</span>
+          </div>
+        </div>
+
+        <div class="ai-panel hidden" id="tab-upload">
+          <div class="ai-live-row">
+            <label class="file-pick">
+              <input type="file" id="aiFileInput" accept="audio/*">
+              <span id="aiFileLabel">&#128228; Choose recording (wav / mp3 / webm / ogg)</span>
+            </label>
+            <button class="btn sm" id="aiUploadBtn">&#128640; Upload &amp; Analyze</button>
+          </div>
+          <div class="muted mt-8" id="aiUploadHint">Tip: play the uploaded file and press <b>Live Listen</b> — the browser transcribes it in real time. Or paste the transcript below.</div>
+          <textarea class="ai-textarea mt-8" id="aiUploadTranscript" placeholder="Optional: paste the transcript so the call is analyzed without audio transcription&hellip;"></textarea>
+          <div class="ai-upload-status" id="aiUploadStatus"></div>
+        </div>
+
+        <div class="ai-panel hidden" id="tab-paste">
+          <div class="ai-live-row">
+            <select class="ai-select" id="aiSample">
+              <option value="">Load a sample transcript&hellip;</option>
+              <option value="digital_arrest">Digital arrest call</option>
+              <option value="bank_impersonation">Bank OTP phishing call</option>
+              <option value="lottery">Lottery prize call</option>
+              <option value="relative_hi">Relative emergency (Hindi)</option>
+              <option value="courier">Courier drugs call</option>
+              <option value="legit">Normal rent call</option>
+            </select>
+            <button class="btn sm" id="aiAnalyzeBtn">&#128269; Analyze Call</button>
+          </div>
+          <textarea class="ai-textarea mt-8" id="aiTranscriptBox" placeholder="Paste the call transcript here — one line per speaker, e.g.&#10;Caller: You have won a lottery! Pay the processing fee now.&#10;Victim: But I never bought a ticket&hellip;&#10;Caller: The offer expires in 10 minutes. Hurry!"></textarea>
+        </div>
+
+        <div class="ai-result hidden" id="aiResult"></div>
+      </div>
+    </section>
+
+    <!-- ================= RIGHT : engine analysis ================= -->
+    <section>
+      <div class="card" id="resultCard">
+        <h2>&#129513; Live Risk Assessment <span class="sub">explainable, per-feature</span></h2>
+        <div class="empty" id="resultEmpty">
+          No transaction analyzed yet.<br>
+          <span class="muted">Pick a scenario and press Pay — the engine scores it in milliseconds.</span>
+        </div>
+
+        <div class="risk-area hidden" id="riskArea">
+          <div class="gauge">
+            <svg viewBox="0 0 158 158">
+              <circle class="track" cx="79" cy="79" r="66"></circle>
+              <circle class="fill" id="gaugeFill" cx="79" cy="79" r="66" stroke-dasharray="414.69" stroke-dashoffset="414.69"></circle>
+            </svg>
+            <div class="val">
+              <div><div class="num" id="scoreVal">0</div><small>risk / 100</small></div>
+            </div>
+          </div>
+          <div class="risk-side">
+            <div class="risk-level" id="levelText">WAITING</div>
+            <span class="risk-tag low" id="levelTag">NO SCAN</span>
+            <div class="verdict-msg" id="verdictMsg">Score a transaction to see the decision verdict.</div>
+          </div>
+        </div>
+
+        <div id="interventionPanel" class="mt-16"></div>
+
+        <div id="featurePanel" class="hidden mt-16">
+          <div class="grid grid-2">
+            <div>
+              <div class="section-label">Feature contribution</div>
+              <div id="breakdown"></div>
+            </div>
+            <div>
+              <div class="section-label">Signal profile</div>
+              <div class="radar-wrap"><svg id="radar" width="210" height="210" viewBox="0 0 210 210"></svg></div>
+              <div class="radar-legend" id="radarLegend"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="expPanel" class="hidden mt-16">
+          <div class="section-label">Why this score?</div>
+          <ul class="exp-list" id="expList"></ul>
+        </div>
+
+        <div id="metaPanel" class="hidden mt-16">
+          <div class="section-label">Evidence &amp; secure channel</div>
+          <div class="chain" id="evidenceChain"></div>
+          <div id="alertStrip" class="mt-12"></div>
+          <button class="btn sm ghost mt-16" id="btnReport">&#128203; Generate Incident Report</button>
+        </div>
+      </div>
+
+      <div class="card mt-16">
+        <h2>&#128274; Verification Flow <span class="sub">proportionate steps after scoring</span></h2>
+        <div id="flowArea">
+          <div class="empty">Run a payment first — the required verification steps appear here.</div>
+        </div>
+        <div class="flex-between mt-12">
+          <span class="muted" id="flowStatus">No active transaction.</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>Parakh (परख) AI prototype &middot; synthetic/simulated data &middot; not a production system &middot; <span id="txnFooter"></span></footer>
+<div class="toast" id="toast"></div>
+
+<div class="modal-backdrop hidden" id="modalBackdrop">
+  <div class="modal">
+    <h3>&#128203; Incident Report Assistant</h3>
+    <div class="m-sub">Pre-filled cybercrime complaint drafted from preserved evidence (hash-chained, tamper-evident).</div>
+    <div class="report-box" id="reportBox"></div>
+    <div class="btn-row">
+      <button class="btn" id="btnCopyReport">&#128203; Copy Report</button>
+      <button class="btn ghost" id="btnCloseModal">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/simulator.js"></script>
+</body>
+</html>

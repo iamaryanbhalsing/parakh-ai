@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Runtime data (regenerated on start)
+backend/data/
+backend/output/
+
+# Generated static export for Netlify (built in CI)
+frontend/
+
+# Env / secrets
+.env
+*.env.local
+
+# Packaging
+*.zip
+*.tar.gz
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parakh AI &middot; Ops Dashboard</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">&#128737;</div>
+    <div>
+      <div class="name">Parakh <span class="brand-hi">परख</span> AI</div>
+      <div class="tag">Fraud operations dashboard &middot; Live</div>
+    </div>
+  </div>
+  <nav class="topnav">
+    <a href="index.html">Payment Simulator</a>
+    <a href="dashboard.html" class="active">Ops Dashboard</a>
+    <a href="#" class="docs-link">API Docs</a>
+  </nav>
+  <span class="badge-live"><span class="dot"></span>Engine Live</span>
+</header>
+
+<script>
+  window.PARAKH_API_BASE = window.PARAKH_API_BASE ||
+    new URLSearchParams(location.search).get("api") || "";
+  document.addEventListener("DOMContentLoaded", function () {
+    var a = document.querySelector(".docs-link");
+    if (a) a.href = (window.PARAKH_API_BASE || "") + "/docs";
+  });
+</script>
+
+<main>
+  <div class="flex-between" style="margin-bottom:18px">
+    <h2 style="font-size:17px">&#128200; Live Fraud Operations</h2>
+    <div class="flex-center">
+      <button class="btn sm green" id="btnLiveDemo">&#9889; Start Live Demo Stream</button>
+      <span class="muted" id="demoState">paused</span>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card blue">
+      <div class="num" id="statTotal">0</div><div class="lbl">Transactions scored</div>
+      <svg class="spark" id="sparkTotal" width="110" height="34"></svg>
+    </div>
+    <div class="stat-card amber">
+      <div class="num" id="statHeld">0</div><div class="lbl">Interventions / holds</div>
+      <svg class="spark" id="sparkHeld" width="110" height="34"></svg>
+    </div>
+    <div class="stat-card red">
+      <div class="num" id="statCritical">0</div><div class="lbl">Critical risk caught</div>
+      <svg class="spark" id="sparkCritical" width="110" height="34"></svg>
+    </div>
+    <div class="stat-card green">
+      <div class="num" id="statFp">0%</div><div class="lbl">False-positive rate</div>
+      <svg class="spark" id="sparkFp" width="110" height="34"></svg>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>&#129513; Risk Distribution <span class="sub">scores by tier</span></h2>
+      <div class="flex-center" style="gap:22px">
+        <svg id="donut" width="150" height="150" viewBox="0 0 150 150"></svg>
+        <div id="donutLegend" style="font-size:12.5px"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>&#128201; Score Timeline <span class="sub">last 40 transactions</span></h2>
+      <svg id="timeline" width="100%" height="150" viewBox="0 0 560 150" preserveAspectRatio="none"></svg>
+      <div class="flex-between mt-8" style="font-size:11.5px;color:var(--text-3)">
+        <span>oldest</span><span>intervention line = 55</span><span>newest</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-2 mt-16">
+    <div class="card">
+      <h2>&#128202; Intervention Queue <span class="sub">expand a row for details</span></h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Txn</th><th>Risk</th><th>Score</th><th>Status</th><th>Hold</th></tr></thead>
+          <tbody id="txnRows"><tr><td colspan="5"><div class="skeleton" style="height:20px"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h2>&#128276; Bank Alert Log <span class="sub">HMAC-SHA256 signed</span></h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Alert</th><th>Event</th><th>Risk</th><th>Signature valid</th></tr></thead>
+          <tbody id="alertRows"><tr><td colspan="4"><div class="skeleton" style="height:20px"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-2 mt-16">
+    <div class="card">
+      <h2>&#128273; Evidence Chain <span class="sub">tamper-evident SHA-256 ledger</span></h2>
+      <div id="chainStatus"></div>
+      <div class="section-label mt-16">Latest entries</div>
+      <div id="chainList" class="chain"></div>
+    </div>
+    <div class="card">
+      <h2>&#129504; AI Call Analyses <span class="sub">NLP/LLM opinions on conversations</span></h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Time</th><th>Verdict</th><th>Fraud</th><th>Intent</th><th>Engine</th><th>Source</th></tr></thead>
+          <tbody id="aiRows"><tr><td colspan="6"><div class="skeleton" style="height:20px"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-2 mt-16">
+    <div class="card">
+      <h2>&#128202; False-Positive Monitoring <span class="sub">user feedback drives precision</span></h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Txn</th><th>Rating</th><th>Label</th><th>Comment</th></tr></thead>
+          <tbody id="fbRows"><tr><td colspan="4" class="empty">No feedback yet — run the simulator and rate a decision.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h2>&#128228; Uploaded Recordings <span class="sub">audio stored for review</span></h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Recording</th><th>Size</th><th>Format</th><th>Analysis</th></tr></thead>
+          <tbody id="recRows"><tr><td colspan="4" class="empty">No recordings uploaded yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-16">
+    <h2>&#128295; Policy Engine <span class="sub">bank-configurable — no redeployment</span></h2>
+    <div class="grid grid-2" style="align-items:start">
+      <div>
+        <div class="section-label">Risk thresholds</div>
+        <div class="row">
+          <div><label>Medium &ge;</label><input type="number" id="polMedium" min="0" max="100"></div>
+          <div><label>High &ge;</label><input type="number" id="polHigh" min="0" max="100"></div>
+          <div><label>Critical &ge;</label><input type="number" id="polCritical" min="0" max="100"></div>
+        </div>
+        <div class="section-label mt-16">Holds (hours)</div>
+        <div class="row">
+          <div><label>High tier</label><input type="number" id="polHoldHigh" min="0" max="240"></div>
+          <div><label>Critical tier</label><input type="number" id="polHoldCrit" min="0" max="240"></div>
+        </div>
+        <div class="section-label mt-16">Bonus weights</div>
+        <div class="row">
+          <div><label>Urgency bonus</label><input type="number" id="polUrgency" min="0" max="50"></div>
+          <div><label>Pattern bonus</label><input type="number" id="polPattern" min="0" max="50"></div>
+          <div><label>Social-eng. bonus</label><input type="number" id="polSocial" min="0" max="50"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="btnSavePolicy">&#128190; Apply Policy</button>
+          <button class="btn ghost" id="btnResetPolicy">Reset to default</button>
+        </div>
+      </div>
+      <div>
+        <div class="note">&#128161; Thresholds are applied <b>live</b> to the running engine via <code>POST /api/policy</code> — every bank can tune without a redeploy. The policy JSON is persisted and survives restarts.</div>
+        <div class="note mt-12">&#129513; Precision guard: raise the Critical threshold if false positives climb; lower it if fraud slips through. Watch the FP rate card.</div>
+        <div id="policyDump" class="mt-12" style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);white-space:pre-wrap;max-height:220px;overflow:auto;background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:12px"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>Parakh (परख) AI prototype &middot; synthetic/simulated data &middot; not a production system</footer>
+<div class="toast" id="toast"></div>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# Netlify deploy — hosts the simulator + dashboard UI (static).
+# The Python API engine is deployed separately (see render.yaml) and can be
+# pointed at via the ?api=<url> query param, or by setting a global
+# window.PARAKH_API_BASE in frontend/js before the app scripts load.
+
+[build]
+  command = "mkdir -p frontend && cp -r backend/app/static/. frontend/"
+  publish = "frontend"

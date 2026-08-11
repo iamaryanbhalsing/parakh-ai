@@ -1,0 +1,18 @@
+# Render blueprint — deploys the Parakh AI Python engine as a web service.
+# Import the GitHub repo on render.com and this file is auto-detected.
+services:
+  - type: web
+    name: parakh-ai
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r backend/requirements.txt"
+    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - key: PARAKH_LLM_BASE_URL
+        value: https://api.openai.com/v1
+      - key: PARAKH_LLM_MODEL
+        value: gpt-4o-mini
+      - key: PARAKH_LLM_API_KEY
+        sync: false
